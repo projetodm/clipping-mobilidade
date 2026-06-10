@@ -1,0 +1,304 @@
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Mobilidade Clipping Dm",
+  "schemaVersion": 1,
+  "description": "Clipping de mobilidade por app — Projeto DM. Aba Diário atualizada terça a sexta às 7h; aba Semanal + Análise atualizada toda segunda às 7h."
+}
+</script>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobilidade por App — Clipping DM</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7;
+    color: #1a1a2e;
+    min-height: 100vh;
+    padding: 20px 18px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .header h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+  .header p  { font-size: 12px; color: #a0aec0; margin-top: 4px; }
+  .cities { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+  .city-tag {
+    background: rgba(99,179,237,0.2); color: #90cdf4;
+    font-size: 11px; padding: 2px 7px; border-radius: 20px;
+  }
+
+  /* TABS */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+    background: #e8eaed;
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+    color: #718096;
+  }
+  .tab-btn.active {
+    background: #fff;
+    color: #1a1a2e;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* COUNT BAR */
+  .count-bar {
+    background: #fff;
+    border-radius: 8px;
+    padding: 9px 14px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  .count-bar strong { color: #1a1a2e; }
+
+  /* ALERT */
+  .alert-bar {
+    background: #fffde7;
+    border: 1px solid #f9e04b;
+    border-radius: 8px;
+    padding: 9px 13px;
+    font-size: 12px;
+    color: #7d6608;
+    margin-bottom: 14px;
+  }
+  .alert-bar.green {
+    background: #f0fff4; border-color: #9ae6b4; color: #276749;
+  }
+
+  /* CARDS */
+  .cards { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+  .card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.07); }
+  .card-header {
+    padding: 13px 16px 0;
+    display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  }
+  .source { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #718096; letter-spacing: 0.5px; }
+  .dot { color: #cbd5e0; font-size: 10px; }
+  .editoria { font-size: 11px; color: #a0aec0; }
+  .card-body { padding: 9px 16px 13px; }
+  .card-body h2 { font-size: 14px; font-weight: 600; line-height: 1.4; color: #1a202c; margin-bottom: 7px; }
+  .card-body p  { font-size: 13px; line-height: 1.6; color: #4a5568; margin-bottom: 8px; }
+  .card-footer {
+    padding: 9px 16px 13px;
+    border-top: 1px solid #f0f0f0;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+  .signals { display: flex; gap: 5px; flex-wrap: wrap; }
+  .signal { font-size: 11px; padding: 2px 7px; border-radius: 20px; font-weight: 500; }
+  .s-naming      { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+  .s-regulacao   { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+  .s-captacao    { background: #fffaf0; color: #c05621; border: 1px solid #fbd38d; }
+  .s-modelo      { background: #ebf8ff; color: #2b6cb0; border: 1px solid #90cdf4; }
+  .s-interior    { background: #faf5ff; color: #6b46c1; border: 1px solid #d6bcfa; }
+  .s-concorrencia{ background: #fff0f6; color: #97266d; border: 1px solid #fbb6ce; }
+  .read-link { font-size: 12px; color: #4299e1; text-decoration: none; font-weight: 500; }
+  .read-link:hover { text-decoration: underline; }
+
+  /* WEEKLY ANALYSIS */
+  .week-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: #a0aec0; margin: 18px 0 8px;
+  }
+  .analysis-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .analysis-block h3 {
+    font-size: 13px; font-weight: 700; color: #2d3748;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 7px;
+  }
+  .analysis-block p {
+    font-size: 13px; line-height: 1.6; color: #4a5568; white-space: pre-wrap;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center; padding: 40px 20px;
+    background: #fff; border-radius: 10px; border: 1px solid #e2e8f0;
+  }
+  .empty-state p { font-size: 13px; color: #a0aec0; margin-top: 8px; }
+
+  .footer {
+    margin-top: 18px; text-align: center;
+    font-size: 11px; color: #a0aec0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🚗 Mobilidade por App — Clipping DM</h1>
+    <p>Projeto Mobilidade · Delivery Much · <span id="header-date"></span></p>
+    <div class="cities">
+      <span class="city-tag">📍 Cáceres</span>
+      <span class="city-tag">📍 Santana do Livramento</span>
+      <span class="city-tag">📍 Barreiras</span>
+      <span class="city-tag">📍 Teotônia</span>
+    </div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('daily')">📰 Diário</button>
+  <button class="tab-btn" onclick="switchTab('weekly')">📊 Semanal + Análise</button>
+</div>
+
+<!-- DAILY TAB -->
+<div id="tab-daily" class="tab-panel active"></div>
+
+<!-- WEEKLY TAB -->
+<div id="tab-weekly" class="tab-panel"></div>
+
+<div class="footer">Atualizado automaticamente · DM Mobilidade Intelligence</div>
+
+<script>
+const SIGNAL_META = {
+  naming:       { label: 'Naming/posicionamento', cls: 's-naming' },
+  concorrencia: { label: 'Concorrência local',    cls: 's-concorrencia' },
+  regulacao:    { label: 'Regulação',             cls: 's-regulacao' },
+  interior:     { label: 'Interior/cidades-piloto', cls: 's-interior' },
+  captacao:     { label: 'Captação de motorista', cls: 's-captacao' },
+  modelo:       { label: 'Modelo de negócio',     cls: 's-modelo' }
+};
+
+const STATE = {"daily":{"date":"10/06/2026","dayOfWeek":"Quarta","alert":"Sem menções diretas às cidades-piloto nas últimas 24h. Nota estratégica: monitoramento recente identificou o app 'Vai e Volta', descrito como 100% cacerense, operando em Cáceres (MT) — concorrente local direto numa das cidades-piloto, vale aprofundar no clipping semanal. Destaque do dia: convergência super-app (99Compras) e maturação do pacote federal de crédito a motoristas/entregadores.","count":6,"articles":[{"source":"Times Brasil","editoria":"Empresas e Negócios · Startups","title":"99 inicia fase de testes do 99Compras na Grande SP, sem data para estreia completa","summary":"A 99 começou a testar compras (supermercado, farmácia, pet) dentro do próprio app em Santo André, São Bernardo e Diadema, avançando rumo a um super-app. Movimento espelha a tese do DM Mobilidade pelo lado inverso: enquanto a 99 (mobilidade) entra em delivery, a DM (delivery) entra em mobilidade. Reforça que o app integrado é a direção do mercado.","url":"https://timesbrasil.com.br/empresas-e-negocios/startups/99-compras-fase-testes-grande-sao-paulo-abcd-paulista/","signals":["concorrencia","modelo"]},{"source":"Maringá Post","editoria":"Política Municipal · Interior PR","title":"Câmara rejeita projeto que previa pontos de descanso para motoristas de aplicativo em Maringá","summary":"A CCJ da Câmara de Maringá (PR) rejeitou projeto que criaria pontos de descanso para motoristas de app, com parecer contrário da Secretaria de Mobilidade. Exemplo de como câmaras municipais do interior legislam (e barram) iniciativas voltadas a motoristas — cada cidade-piloto da DM pode ter dinâmica regulatória local própria.","url":"https://maringapost.com.br/2026/06/10/camara-rejeita-projeto-que-previa-criacao-de-pontos-de-descanso-para-motoristas-de-aplicativo-em-maringa/","signals":["regulacao","interior"]},{"source":"Kinvo","editoria":"Economia / Federal","title":"Governo lança 'Move Motos', linha bilionária de crédito para entregadores financiarem motos novas","summary":"Anunciada na segunda (9), a nova modalidade do Move Brasil destina cerca de R$ 4 bi a motociclistas de app para compra de motos novas, replicando o modelo já criado para carros. Mapeia o perfil de trabalhador de plataforma (entregador) que pode migrar para motorista de passageiros — base potencial de captação para a DM no interior.","url":"https://kinvo.com.br/noticia/governo-prepara-novo-plano-bilionario-agora-para-entregadores","signals":["captacao","modelo","regulacao"]},{"source":"O Globo","editoria":"Economia","title":"Move Brasil: montadoras ampliam descontos para taxistas e motoristas de app com crédito de R$ 30 bi","summary":"Com o crédito federal de R$ 30 bi em vigor, montadoras divulgaram modelos com descontos para taxistas e motoristas de app; Toyota chegou a reposicionar o Yaris Cross XR para enquadrá-lo no programa. Barateia o acesso ao veículo e tende a ampliar a oferta de motoristas — fator de captação relevante para as cidades-piloto.","url":"https://oglobo.globo.com/economia/noticia/2026/06/09/move-brasil-veja-modelos-de-carros-que-podem-ser-comprados-com-desconto-pelo-programa.ghtml","signals":["captacao","modelo"]},{"source":"Tribuna do Sertão","editoria":"Mobilidade · RJ","title":"Alta de passagens e combustíveis impulsiona caronas por aplicativo no Rio; Detro classifica como ilegal","summary":"O BlaBlaCar soma 520 mil usuários ativos no RJ enquanto o Detro-RJ trata o serviço de caronas como transporte ilegal. Mostra demanda reprimida por alternativas de baixo custo e a tensão regulatória sobre modelos não convencionais de mobilidade — pontos a considerar no posicionamento e no desenho de modelo da DM.","url":"https://www.tribunadosertao.com.br/rj-em-foco/2026/06/10/918197-alta-de-passagens-e-combustiveis-impulsiona-caronas-por-aplicativo-no-rio","signals":["concorrencia","regulacao","modelo"]},{"source":"Sampi","editoria":"Segurança · Campinas SP","title":"Polícia prende quadrilha após tortura e sequestro de motorista de aplicativo em Campinas","summary":"Motorista foi atraído por uma corrida falsa, mantido cerca de uma hora sob poder do grupo e acabou internado. Segurança do motorista segue como dor central da categoria — tema que pesa no posicionamento de marca e em recursos de proteção que a DM pode usar como diferencial de captação.","url":"https://sampi.net.br/campinas/noticias/2984993/campinas/2026/06/rota-prende-bando-apos-tortura-e-sequestro-de-motorista-de-app","signals":["regulacao","captacao"]}]},"weekly":{"weekOf":"","count":0,"articles":[],"analysis":{"naming":"","captacao":"","tese":""}}};
+
+function signalChips(signals) {
+  return signals.map(s => {
+    const m = SIGNAL_META[s] || { label: s, cls: '' };
+    return `<span class="signal ${m.cls}">${m.label}</span>`;
+  }).join('');
+}
+
+function renderCard(a) {
+  return `
+    <div class="card">
+      <div class="card-header">
+        <span class="source">${a.source}</span>
+        <span class="dot">·</span>
+        <span class="editoria">${a.editoria}</span>
+      </div>
+      <div class="card-body">
+        <h2>${a.title}</h2>
+        <p>${a.summary}</p>
+      </div>
+      <div class="card-footer">
+        <div class="signals">${signalChips(a.signals)}</div>
+        <a class="read-link" href="${a.url}" target="_blank">Ler matéria →</a>
+      </div>
+    </div>`;
+}
+
+function renderDaily() {
+  const d = STATE.daily;
+  if (!d || !d.count) {
+    return `<div class="empty-state">
+      <div style="font-size:32px">📭</div>
+      <p>Nenhum clipping diário disponível ainda.</p>
+    </div>`;
+  }
+  const alertClass = d.alert.toLowerCase().includes('nenhuma') ? '' : 'green';
+  return `
+    <div class="count-bar">
+      <span>📰</span>
+      <strong>${d.count} matérias</strong><span>&nbsp;·&nbsp;${d.dayOfWeek}, ${d.date}</span>
+    </div>
+    ${d.alert ? `<div class="alert-bar ${alertClass}">⚠️ ${d.alert}</div>` : ''}
+    <div class="cards">${d.articles.map(renderCard).join('')}</div>`;
+}
+
+function renderWeekly() {
+  const w = STATE.weekly;
+  if (!w || !w.count) {
+    return `<div class="empty-state">
+      <div style="font-size:32px">📅</div>
+      <p>A análise semanal será gerada na próxima segunda-feira às 7h.</p>
+    </div>`;
+  }
+  const hasAnalysis = w.analysis && (w.analysis.naming || w.analysis.captacao || w.analysis.tese);
+  return `
+    <div class="count-bar">
+      <span>📊</span>
+      <strong>${w.count} matérias monitoradas</strong><span>&nbsp;·&nbsp;Semana de ${w.weekOf}</span>
+    </div>
+    ${hasAnalysis ? `
+      <div class="week-label">📊 Análise Crítica da Semana</div>
+      ${w.analysis.naming ? `<div class="analysis-block"><h3>🏷️ Naming / Posicionamento</h3><p>${w.analysis.naming}</p></div>` : ''}
+      ${w.analysis.captacao ? `<div class="analysis-block"><h3>🚗 Captação de Motorista</h3><p>${w.analysis.captacao}</p></div>` : ''}
+      ${w.analysis.tese ? `<div class="analysis-block"><h3>🎯 Dado Crítico — Tese de Conversão de Base</h3><p>${w.analysis.tese}</p></div>` : ''}
+      <div class="week-label">🗞️ Matérias da Semana</div>
+    ` : ''}
+    <div class="cards">${w.articles.map(renderCard).join('')}</div>`;
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && tab === 'daily') || (i === 1 && tab === 'weekly'));
+  });
+  document.getElementById('tab-daily').classList.toggle('active', tab === 'daily');
+  document.getElementById('tab-weekly').classList.toggle('active', tab === 'weekly');
+}
+
+// Render
+document.getElementById('header-date').textContent = STATE.daily.date || '';
+document.getElementById('tab-daily').innerHTML = renderDaily();
+document.getElementById('tab-weekly').innerHTML = renderWeekly();
+
+// Restore last tab from localStorage
+const lastTab = localStorage.getItem('dm-clipping-tab') || 'daily';
+switchTab(lastTab);
+document.querySelectorAll('.tab-btn').forEach((b, i) => {
+  b.addEventListener('click', () => {
+    localStorage.setItem('dm-clipping-tab', i === 0 ? 'daily' : 'weekly');
+  });
+});
+</script>
+</body>
+</html>
